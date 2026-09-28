@@ -39,7 +39,7 @@ const Trending = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-60px' }}
-          className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4"
+          className="grid grid-cols-2 gap-x-3 gap-y-8 sm:gap-x-6 sm:gap-y-12 sm:grid-cols-2 lg:grid-cols-4"
         >
           {trendingProducts.map((product) => {
             const finalPrice = product.discount
@@ -55,20 +55,20 @@ const Trending = () => {
                       alt={product.name}
                       loading="lazy"
                       decoding="async"
-                      className="h-full w-full object-contain p-10 transition-transform duration-700 ease-out group-hover:scale-105"
+                      className="h-full w-full object-contain p-4 sm:p-10 transition-transform duration-700 ease-out group-hover:scale-105"
                     />
 
                     {product.discount ? (
-                      <span className="absolute left-4 top-4 rounded-full border border-cyan-400/25 bg-cyan-400/10 px-2.5 py-1 text-[10px] font-medium tracking-wide text-cyan-300 backdrop-blur-md">
+                      <span className="absolute left-2 top-2 sm:left-4 sm:top-4 rounded-full border border-cyan-400/25 bg-cyan-400/10 px-1.5 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-[10px] font-medium tracking-wide text-cyan-300 backdrop-blur-md">
                         {product.discount}% off
                       </span>
                     ) : null}
                   </div>
                 </Link>
 
-                <div className="mt-5 flex items-start justify-between gap-4">
+                <div className="mt-3 sm:mt-5 flex items-start justify-between gap-2 sm:gap-4">
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-gray-500">
+                    <div className="flex items-center gap-1 sm:gap-2 text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-gray-500">
                       <span>{product.brand}</span>
                       {product.rating ? (
                         <span className="flex items-center gap-1 normal-case tracking-normal text-gray-600">
@@ -77,15 +77,15 @@ const Trending = () => {
                         </span>
                       ) : null}
                     </div>
-                    <h3 className="mt-2 line-clamp-2 text-sm font-medium leading-snug text-white transition-colors duration-300 group-hover:text-cyan-200 sm:text-base">
+                    <h3 className="mt-1 sm:mt-2 line-clamp-2 text-xs sm:text-base font-medium leading-snug text-white transition-colors duration-300 group-hover:text-cyan-200">
                       {product.name}
                     </h3>
                   </div>
 
                   <div className="shrink-0 text-right">
-                    <p className="text-sm font-medium text-white sm:text-base">₹{finalPrice}</p>
+                    <p className="text-xs sm:text-base font-medium text-white">₹{finalPrice}</p>
                     {product.discount ? (
-                      <p className="text-xs text-gray-600 line-through">₹{product.price}</p>
+                      <p className="text-[10px] sm:text-xs text-gray-600 line-through">₹{product.price}</p>
                     ) : null}
                   </div>
                 </div>

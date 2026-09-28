@@ -101,12 +101,6 @@ const AdminLogin = () => {
               {!isSubmitting && <ArrowRight size={16} />}
             </button>
           </form>
-          
-          {/* Demo Credentials Footer Info */}
-          <div className="mt-5 sm:mt-6 text-center border-t border-white/5 pt-3 sm:pt-4">
-            <p className="text-[10px] sm:text-xs text-gray-500">Demo Credentials:</p>
-            <p className="text-[10px] sm:text-xs text-cyan-400/70 font-mono mt-0.5">U: fluxadmin | P: flux@1122</p>
-          </div>
         </div>
 
         {/* Back to Homepage Responsive Link Node */}

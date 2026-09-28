@@ -35,7 +35,7 @@ const Footer = () => {
                         to={link.path} 
                         className={`transition-colors duration-200 ${
                           link.name === 'Admin Panel' 
-                            ? 'text-gray-500 hover:text-goldlux-orange font-medium' 
+                            ? 'text-gray-900 hover:text-goldlux-orange font-medium' 
                             : 'hover:text-goldlux-orange'
                         }`}
                       >

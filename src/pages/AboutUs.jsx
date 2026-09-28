@@ -13,19 +13,6 @@ const AboutUs = () => {
 
   return (
     <main className="relative bg-[#050505] text-white min-h-screen pt-28 sm:pt-32 overflow-hidden">
-      {/* Spline Background */}
-      <div className="spline-container absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
-        <iframe
-          src="https://my.spline.design/font-PoWAh7XBlgAoAcENsaYMuA9u/"
-          frameborder="0"
-          width="100%"
-          height="100%"
-          id="aura-spline"
-          title="Aura Spline Background"
-        />
-        <div className="absolute inset-0 bg-[#050505]/70" />
-      </div>
-
       <div className="relative z-10">
       {/* Coming Soon Hero Section */}
       <ComingSoonHero />

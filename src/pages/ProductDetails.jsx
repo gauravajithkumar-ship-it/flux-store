@@ -247,19 +247,19 @@ const ProductDetails = () => {
                     No similar products found in the same category.
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                     {similarProducts.map(p => (
                       <button 
                         key={p.id}
                         onClick={() => setCompareProduct(p)}
-                        className="glass p-4 rounded-2xl flex flex-col items-center gap-4 hover:border-cyan-500/50 transition-colors text-left"
+                        className="glass p-3 sm:p-4 rounded-2xl flex flex-col items-center gap-2 sm:gap-4 hover:border-cyan-500/50 transition-colors text-left"
                       >
-                        <div className="w-full aspect-square bg-black/40 rounded-xl p-4 flex items-center justify-center">
+                        <div className="w-full aspect-square bg-black/40 rounded-xl p-3 sm:p-4 flex items-center justify-center">
                           <img src={p.img} alt={p.name} className="w-full h-full object-contain mix-blend-screen" />
                         </div>
                         <div className="w-full">
-                          <h4 className="font-semibold truncate w-full">{p.name}</h4>
-                          <p className="text-cyan-400 font-bold mt-1">₹{p.price}</p>
+                          <h4 className="text-sm sm:text-base font-semibold truncate w-full">{p.name}</h4>
+                          <p className="text-cyan-400 font-bold mt-0.5 sm:mt-1 text-sm sm:text-base">₹{p.price}</p>
                         </div>
                       </button>
                     ))}

@@ -2,39 +2,52 @@ import React, { createContext, useState, useContext, useRef, useEffect } from 'r
 
 const MouseEnterContext = createContext();
 
-export const CardContainer = ({ children, className = '' }) => {
+export const CardContainer = ({ children, className = '', maxTilt = 10, lift = 1.02, perspective = 1000 }) => {
   const containerRef = useRef(null);
   const [isMouseEntered, setIsMouseEntered] = useState(false);
+  const hasHover = useRef(false);
 
-  const handleMouseMove = (e) => {
-    if (!containerRef.current) return;
-    const card = containerRef.current;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = ((y - centerY) / centerY) * -10;
-    const rotateY = ((x - centerX) / centerX) * 10;
+  useEffect(() => {
+    hasHover.current =
+      typeof window !== 'undefined' &&
+      window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  }, []);
 
-    containerRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-  };
-
-  const handleMouseLeave = () => {
+  const reset = () => {
     setIsMouseEntered(false);
     if (containerRef.current) {
-      containerRef.current.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+      containerRef.current.style.transform = `perspective(${perspective}px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
     }
+  };
+
+  const handlePointerMove = (e) => {
+    if (!hasHover.current || !containerRef.current) return;
+    const card = containerRef.current;
+    const rect = card.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const rotateX = ((y - rect.height / 2) / (rect.height / 2)) * -maxTilt;
+    const rotateY = ((x - rect.width / 2) / (rect.width / 2)) * maxTilt;
+
+    card.style.transform = `perspective(${perspective}px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(${lift}, ${lift}, ${lift})`;
+  };
+
+  const handlePointerDown = () => {
+    if (hasHover.current || !containerRef.current) return;
+    containerRef.current.style.transform = `perspective(${perspective}px) rotateX(4deg) rotateY(0deg) scale3d(0.97, 0.97, 0.97)`;
   };
 
   return (
     <MouseEnterContext.Provider value={[isMouseEntered, setIsMouseEntered]}>
       <div
-        className={`[transform-style:preserve-3d] transition-all duration-200 ease-linear ${className}`}
+        className={`[transform-style:preserve-3d] transition-transform duration-150 ease-out will-change-transform ${className}`}
         ref={containerRef}
-        onMouseEnter={() => { setIsMouseEntered(true); }}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        onPointerEnter={() => { setIsMouseEntered(true); }}
+        onPointerMove={handlePointerMove}
+        onPointerDown={handlePointerDown}
+        onPointerLeave={reset}
+        onPointerCancel={reset}
       >
         {children}
       </div>

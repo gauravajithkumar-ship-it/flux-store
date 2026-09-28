@@ -7,12 +7,15 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node ip-gate/index.js",
+    "test:gate": "node ip-gate/ip-gate.test.mjs"
   },
   "dependencies": {
     "@paper-design/shaders": "^0.0.80",
     "@supabase/supabase-js": "^2.109.0",
     "clsx": "^2.1.1",
+    "express": "^5.1.0",
     "framer-motion": "^12.42.0",
     "gsap": "^3.15.0",
     "html2canvas": "^1.4.1",
