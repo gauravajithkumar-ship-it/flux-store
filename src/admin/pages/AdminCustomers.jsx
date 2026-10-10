@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Search, Mail, Phone, Calendar, Clock, RotateCcw, Truck, CheckCircle2, XCircle, ShoppingBag, ChevronDown, ChevronUp } from 'lucide-react';
+import { normalizeStatus } from '../../utils/orderStatus';
+import { Search, Calendar, Clock, RotateCcw, Truck, CheckCircle2, XCircle, ShoppingBag, ChevronDown, ChevronUp } from 'lucide-react';
 
 const statusConfig = {
-  Pending: { color: 'text-amber-400 bg-amber-400/10 border-amber-400/20', icon: Clock },
-  Processing: { color: 'text-cyan-400 bg-cyan-400/10 border-cyan-400/20', icon: RotateCcw },
-  Shipped: { color: 'text-blue-400 bg-blue-400/10 border-blue-400/20', icon: Truck },
-  Delivered: { color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20', icon: CheckCircle2 },
+  'Order Received': { color: 'text-gray-300 bg-gray-400/10 border-gray-400/20', icon: Clock },
+  'Payment Verified': { color: 'text-blue-400 bg-blue-400/10 border-blue-400/20', icon: CheckCircle2 },
+  'Packing & Quality Check': { color: 'text-orange-400 bg-orange-400/10 border-orange-400/20', icon: RotateCcw },
+  'Successfully Delivered': { color: 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20', icon: Truck },
   Cancelled: { color: 'text-red-400 bg-red-400/10 border-red-400/20', icon: XCircle },
 };
 
@@ -190,8 +191,8 @@ const AdminCustomers = () => {
                           <div className="grid gap-3">
                             {orders.map(order => {
                               const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
-                              const status = order.status || 'Pending';
-                              const config = statusConfig[status] || statusConfig.Pending;
+                              const status = normalizeStatus(order.status);
+                              const config = statusConfig[status] || statusConfig['Order Received'];
                               const StatusIcon = config.icon;
 
                               return (

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { X, Trash2, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 const CartDrawer = () => {
@@ -47,12 +47,13 @@ const CartDrawer = () => {
                 <div className="flex flex-col items-center justify-center h-full text-gray-400">
                   <ShoppingBag size={48} className="mb-4 opacity-20" />
                   <p className="text-lg">Your cart is empty.</p>
-                  <button
+                  <Link
+                    to="/products"
                     onClick={() => setIsCartOpen(false)}
                     className="mt-6 text-cyan-400 hover:underline"
                   >
                     Continue Shopping
-                  </button>
+                  </Link>
                 </div>
               ) : (
                 cartItems.map((item) => (
@@ -107,13 +108,6 @@ const CartDrawer = () => {
                     className="w-full py-3 px-4 glass rounded-xl font-semibold text-center hover:bg-white/5 transition-colors"
                   >
                     View Cart
-                  </Link>
-                  <Link
-                    to="/checkout"
-                    onClick={() => setIsCartOpen(false)}
-                    className="w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-400 text-black rounded-xl font-bold flex items-center justify-center gap-2 transition-transform hover:scale-[1.02]"
-                  >
-                    Checkout <ArrowRight size={18} />
                   </Link>
                 </div>
               </div>

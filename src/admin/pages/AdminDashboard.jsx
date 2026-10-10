@@ -116,10 +116,10 @@ const AdminDashboard = () => {
             </thead>
             <tbody className="text-xs text-gray-400 divide-y divide-white/5">
               {[
-                { id: '#ORD-9021', customer: 'Rahul Sharma', amount: '₹45,999', status: 'Delivered', date: '2 hrs ago', statusColor: 'text-emerald-400 bg-emerald-400/10 border-emerald-500/20' },
-                { id: '#ORD-9022', customer: 'Priya Patel', amount: '₹12,499', status: 'Processing', date: '4 hrs ago', statusColor: 'text-cyan-400 bg-cyan-400/10 border-cyan-500/20' },
-                { id: '#ORD-9023', customer: 'Amit Kumar', amount: '₹89,900', status: 'Shipped', date: '5 hrs ago', statusColor: 'text-blue-400 bg-blue-400/10 border-blue-500/20' },
-                { id: '#ORD-9024', customer: 'Neha Singh', amount: '₹3,499', status: 'Pending', date: '1 day ago', statusColor: 'text-amber-400 bg-amber-400/10 border-amber-500/20' },
+                { id: '#ORD-9021', customer: 'Rahul Sharma', amount: '₹45,999', status: 'Successfully Delivered', date: '2 hrs ago', statusColor: 'text-emerald-400 bg-emerald-400/10 border-emerald-500/20' },
+                { id: '#ORD-9022', customer: 'Priya Patel', amount: '₹12,499', status: 'Packing & Quality Check', date: '4 hrs ago', statusColor: 'text-orange-400 bg-orange-400/10 border-orange-500/20' },
+                { id: '#ORD-9023', customer: 'Amit Kumar', amount: '₹89,900', status: 'Payment Verified', date: '5 hrs ago', statusColor: 'text-blue-400 bg-blue-400/10 border-blue-500/20' },
+                { id: '#ORD-9024', customer: 'Neha Singh', amount: '₹3,499', status: 'Order Received', date: '1 day ago', statusColor: 'text-gray-300 bg-gray-400/10 border-gray-400/20' },
               ].map((order, i) => (
                 <tr key={i} className="hover:bg-white/[0.02] transition-colors group">
                   <td className="px-6 py-4 font-medium text-white">{order.id}</td>

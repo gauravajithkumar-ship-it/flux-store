@@ -1,15 +1,33 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Package, LogIn, Truck, ShieldCheck, MapPin, Phone, Mail, ChevronDown, ChevronUp } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  Package, LogIn, Truck, ShieldCheck, MapPin, Phone, Mail, ChevronDown, ChevronUp,
+  ClipboardList, BadgeCheck, PackageCheck, CheckCircle2, Download, Loader2, Check,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { normalizeStatus, getStepIndex } from '../utils/orderStatus';
 
 const STATUS_STYLES = {
-  Pending: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  Processing: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-  Shipped: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  Delivered: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  Cancelled: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+  'Order Received': 'bg-gray-500/10 text-gray-300 border-gray-500/30',
+  'Payment Verified': 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+  'Packing & Quality Check': 'bg-orange-500/10 text-orange-400 border-orange-500/30',
+  'Successfully Delivered': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+  Cancelled: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
+};
+
+const TRACKER_STEPS = [
+  { label: 'Order Received', color: 'gray', icon: ClipboardList },
+  { label: 'Payment Verified', color: 'blue', icon: BadgeCheck },
+  { label: 'Packing & Quality Check', color: 'orange', icon: PackageCheck },
+  { label: 'Successfully Delivered', color: 'green', icon: CheckCircle2 },
+];
+
+const STEP_COLORS = {
+  gray: { dot: 'bg-gray-500 text-white', line: 'bg-gray-500', text: 'text-gray-200', ring: 'ring-gray-500/30' },
+  blue: { dot: 'bg-blue-500 text-white', line: 'bg-blue-500', text: 'text-blue-400', ring: 'ring-blue-500/30' },
+  orange: { dot: 'bg-orange-500 text-white', line: 'bg-orange-500', text: 'text-orange-400', ring: 'ring-orange-500/30' },
+  green: { dot: 'bg-emerald-500 text-white', line: 'bg-emerald-500', text: 'text-emerald-400', ring: 'ring-emerald-500/30' },
 };
 
 const OrderHistory = () => {
@@ -18,6 +36,8 @@ const OrderHistory = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
   const [error, setError] = useState(null);
+  const [downloadingId, setDownloadingId] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -44,6 +64,67 @@ const OrderHistory = () => {
 
     fetchOrders();
   }, [user?.id]);
+
+  // Live-sync status changes made by the admin
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const channel = supabase
+      .channel(`order-status-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'adminOrders' },
+        (payload) => {
+          setOrders((prev) => {
+            const isUserOrder = prev.some((o) => o.id === payload.new.id);
+            if (isUserOrder) {
+              return prev.map((o) => (o.id === payload.new.id ? { ...o, ...payload.new } : o));
+            }
+            return prev;
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
+  const handleDownloadInvoice = async (order) => {
+    try {
+      setDownloadingId(order.id);
+
+      let invoiceId = null;
+      const { data: invoice } = await supabase
+        .from('adminInvoices')
+        .select('id')
+        .eq('order_id', order.id)
+        .maybeSingle();
+      if (invoice) invoiceId = invoice.id;
+
+      const mappedOrder = {
+        orderId: order.id,
+        invoiceId,
+        date: order.created_at,
+        paymentMethod: order.payment_method,
+        customer: order.shipping_address,
+        items: order.items,
+        subtotal: order.subtotal,
+        shipping: order.shipping_cost,
+        gst: order.gst_amount,
+        discount: order.discount,
+        total: order.total,
+      };
+
+      navigate('/order-success', { state: { order: mappedOrder } });
+    } catch (err) {
+      console.error('Failed to open invoice:', err);
+      alert('Failed to open invoice. Please try again.');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-IN', {
@@ -121,7 +202,8 @@ const OrderHistory = () => {
           <div className="space-y-4">
             {orders.map((order) => {
               const isExpanded = expandedId === order.id;
-              const statusStyle = STATUS_STYLES[order.status] || STATUS_STYLES.Pending;
+              const statusStyle = STATUS_STYLES[normalizeStatus(order.status)] || STATUS_STYLES['Order Received'];
+              const currentStep = getStepIndex(order.status);
 
               return (
                 <div
@@ -149,7 +231,7 @@ const OrderHistory = () => {
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium border ${statusStyle}`}>
-                        {order.status || 'Pending'}
+                        {normalizeStatus(order.status)}
                       </span>
                       {isExpanded ? <ChevronUp size={18} className="text-gray-400" /> : <ChevronDown size={18} className="text-gray-400" />}
                     </div>
@@ -158,6 +240,91 @@ const OrderHistory = () => {
                   {/* Order Details */}
                   {isExpanded && (
                     <div className="border-t border-white/10 p-4 sm:p-6 space-y-6">
+                      {/* Visual Status Tracker */}
+                      <div>
+                        <h3 className="text-sm font-semibold text-white mb-5 flex items-center gap-2">
+                          <Truck size={16} className="text-goldlux-orange" /> Order Status
+                        </h3>
+                        <div className="flex flex-col sm:flex-row">
+                          {TRACKER_STEPS.map((step, i) => {
+                            const isActive = i <= currentStep;
+                            const isCurrent = i === currentStep;
+                            const isCompleted = i < currentStep;
+                            const isLast = i === TRACKER_STEPS.length - 1;
+                            const colors = isActive ? STEP_COLORS[step.color] : null;
+                            const StepIcon = step.icon;
+
+                            return (
+                              <div
+                                key={step.label}
+                                className="relative flex sm:flex-col items-start sm:items-center flex-1 min-w-0"
+                              >
+                                {/* Connector line: vertical (mobile), horizontal (desktop) */}
+                                {!isLast && (
+                                  <>
+                                    <div
+                                      className={`hidden sm:block absolute top-5 left-1/2 w-full h-0.5 ${
+                                        isCompleted ? colors.line : 'bg-white/10'
+                                      }`}
+                                    />
+                                    <div
+                                      className={`sm:hidden absolute top-10 bottom-0 left-[19px] w-0.5 ${
+                                        isCompleted ? STEP_COLORS[step.color].line : 'bg-white/10'
+                                      }`}
+                                    />
+                                  </>
+                                )}
+
+                                {/* Step circle: check for completed, icon for current/future */}
+                                <div
+                                  className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                                    isActive
+                                      ? `${colors.dot} ${isCurrent ? `ring-4 ring-offset-2 ring-offset-background ${colors.ring}` : ''}`
+                                      : 'bg-white/10 text-gray-500 border border-white/10'
+                                  }`}
+                                >
+                                  {isCompleted ? <Check size={18} strokeWidth={3} /> : <StepIcon size={18} />}
+                                </div>
+
+                                {/* Step label: active is bold/bright, completed keeps color, future is gray */}
+                                <div className="ml-4 sm:ml-0 sm:mt-3 sm:text-center min-w-0 sm:max-w-[9rem]">
+                                  <p
+                                    className={`leading-tight ${
+                                      isCurrent
+                                        ? `text-sm sm:text-base font-bold ${colors.text}`
+                                        : isActive
+                                          ? 'text-xs sm:text-sm font-medium text-gray-300'
+                                          : 'text-xs sm:text-sm font-medium text-gray-500'
+                                    }`}
+                                  >
+                                    {step.label}
+                                  </p>
+                                  {isCurrent && (
+                                    <p className="text-[10px] uppercase tracking-wide text-gray-500 mt-1">
+                                      {currentStep === 3 ? 'Completed' : 'Current step'}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Download Invoice (always available) */}
+                        <button
+                          onClick={() => handleDownloadInvoice(order)}
+                          disabled={downloadingId === order.id}
+                          className="mt-6 w-full sm:w-auto bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium px-6 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+                        >
+                            {downloadingId === order.id ? (
+                              <Loader2 size={18} className="animate-spin" />
+                            ) : (
+                              <Download size={18} />
+                            )}
+                            Download Invoice
+                          </button>
+                      </div>
+
                       {/* Items */}
                       <div>
                         <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">

@@ -1,13 +1,33 @@
-import { useRef } from 'react';
+import { useRef, useState, useLayoutEffect, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import { useLocation, Link, Navigate } from 'react-router-dom';
 import { CheckCircle, Printer, Download, ShoppingBag } from 'lucide-react';
 import Invoice from '../components/Invoice';
 import { generateInvoicePdf } from '../utils/generateInvoicePdf';
 
+const A4_WIDTH = 794;
+
 const OrderSuccess = () => {
   const location = useLocation();
   const order = location.state?.order;
   const invoiceRef = useRef(null);
+  const stageRef = useRef(null);
+  const capturingRef = useRef(false);
+  const [scale, setScale] = useState(1);
+
+  const measure = useCallback(() => {
+    if (capturingRef.current) return;
+    const stage = stageRef.current;
+    if (!stage) return;
+    setScale(Math.min(1, stage.clientWidth / A4_WIDTH));
+  }, []);
+
+  useLayoutEffect(() => {
+    measure();
+    const observer = new ResizeObserver(measure);
+    if (stageRef.current) observer.observe(stageRef.current);
+    return () => observer.disconnect();
+  }, [measure]);
 
   if (!order) {
     return <Navigate to="/" replace />;
@@ -22,8 +42,18 @@ const OrderSuccess = () => {
     const element = invoiceRef.current;
     if (!element) return;
 
-    const pdf = await generateInvoicePdf(element);
-    pdf.save(`Invoice_${order.orderId}.pdf`);
+    // The on-screen preview is CSS-scaled to fit narrow viewports. An ancestor
+    // transform would be cloned into html2canvas's iframe and skew the capture,
+    // so drop the scale for the duration of the render.
+    capturingRef.current = true;
+    flushSync(() => setScale(1));
+    try {
+      const pdf = await generateInvoicePdf(element);
+      pdf.save(`Invoice_${order.orderId}.pdf`);
+    } finally {
+      capturingRef.current = false;
+      measure();
+    }
   };
 
   return (
@@ -53,8 +83,15 @@ const OrderSuccess = () => {
           </div>
         </div>
 
-        {/* Invoice Printable Area */}
-        <Invoice ref={invoiceRef} order={order} className="shadow-2xl print:shadow-none rounded-xl" />
+        {/* Invoice Printable Area - fixed A4, scaled down to fit narrow screens */}
+        <div ref={stageRef} className="w-full overflow-hidden print:overflow-visible">
+          <div
+            className="invoice-scale origin-top-left shadow-2xl print:shadow-none"
+            style={{ width: A4_WIDTH, transform: `scale(${scale})` }}
+          >
+            <Invoice ref={invoiceRef} order={order} />
+          </div>
+        </div>
       </div>
 
       {/* Styles adjusted to preserve background colors during native printing */}
@@ -71,6 +108,11 @@ const OrderSuccess = () => {
           }
           .bg-background {
             background-color: white !important;
+          }
+          /* Undo the on-screen fit-to-width scale so the printed sheet is full A4. */
+          .invoice-scale {
+            transform: none !important;
+            width: auto !important;
           }
         }
       `}</style>

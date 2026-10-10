@@ -3,7 +3,7 @@ import { jsPDF } from 'jspdf';
 
 export const generateInvoicePdf = async (element) => {
   const canvas = await html2canvas(element, {
-    scale: 2,
+    scale: 2.5,
     useCORS: true,
     logging: false,
     backgroundColor: '#ffffff',

@@ -23,13 +23,13 @@ import AdminDashboard from './admin/pages/AdminDashboard';
 import AdminProducts from './admin/pages/AdminProducts';
 import AdminOrders from './admin/pages/AdminOrders';
 import AdminCustomers from './admin/pages/AdminCustomers';
-import AdminInvoices from './admin/pages/AdminInvoices';
 import AdminGiftCards from './admin/pages/AdminGiftCards';
 import AdminCoupons from './admin/pages/AdminCoupons';
 import AdminReports from './admin/pages/AdminReports';
 import AdminContacts from './admin/pages/AdminContacts';
 import AdminB2BEnquiries from './admin/pages/AdminB2BEnquiries';
 import AdminAnnouncements from './admin/pages/AdminAnnouncements';
+import AdminBranches from './admin/pages/AdminBranches';
 import AdminSettings from './admin/pages/AdminSettings';
 
 function App() {
@@ -65,12 +65,13 @@ function App() {
           <Route path="gift-cards" element={<AdminGiftCards />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="customers" element={<AdminCustomers />} />
-          <Route path="invoices" element={<AdminInvoices />} />
+          <Route path="invoices" element={<Navigate to="/admin/orders" replace />} />
           <Route path="coupons" element={<AdminCoupons />} />
           <Route path="reports" element={<AdminReports />} />
           <Route path="contacts" element={<AdminContacts />} />
           <Route path="b2b-enquiries" element={<AdminB2BEnquiries />} />
           <Route path="announcements" element={<AdminAnnouncements />} />
+          <Route path="branches" element={<AdminBranches />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
       </Routes>

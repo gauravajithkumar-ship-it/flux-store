@@ -314,13 +314,18 @@ const Navbar = () => {
         `}</style>
 
         {/* ---------- Desktop: split around a centred logo ---------- */}
-        <div className="relative mx-auto hidden max-w-7xl px-6 xl:block xl:px-12">
-          <div className="flex items-center justify-between gap-4">
-            <nav className="flex items-center gap-2">
+        <div className="mx-auto hidden max-w-7xl px-6 xl:block xl:px-12">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center">
+            <nav className="flex items-center justify-self-start gap-2">
               {leftLinks.map((link, i) => renderLink(link, i))}
             </nav>
 
-            <div className="flex items-center gap-2">
+            {/* Logo owns the centre column so nearby links (e.g. TV) keep a gap from it */}
+            <div className="justify-self-center px-10">
+              <Logo />
+            </div>
+
+            <div className="flex items-center justify-self-end gap-2">
               {rightLinks.map((link, i) => renderLink(link, i + leftLinks.length))}
 
               <div className="relative" ref={moreRef}>
@@ -363,13 +368,6 @@ const Navbar = () => {
               <span className="mx-4 h-4 w-px bg-white/10" />
 
               <Actions />
-            </div>
-          </div>
-
-          {/* Logo stays optically centred regardless of side widths */}
-          <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="pointer-events-auto">
-              <Logo />
             </div>
           </div>
         </div>

@@ -5,7 +5,6 @@ import {
   ShoppingCart, 
   Users, 
   Briefcase, 
-  FileText, 
   Ticket, 
   BarChart2, 
   Settings,
@@ -13,7 +12,8 @@ import {
   X,
   MessageSquare,
   Megaphone,
-  Gift
+  Gift,
+  Building2
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
@@ -26,12 +26,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { name: 'Gift Cards', path: '/admin/gift-cards', icon: Gift },
     { name: 'Orders', path: '/admin/orders', icon: ShoppingCart },
     { name: 'Customers', path: '/admin/customers', icon: Users },
-    { name: 'Invoices', path: '/admin/invoices', icon: FileText },
     { name: 'Coupons', path: '/admin/coupons', icon: Ticket },
     { name: 'Reports', path: '/admin/reports', icon: BarChart2 },
     { name: 'Enquiries', path: '/admin/contacts', icon: MessageSquare },
     { name: 'B2B Enquiries', path: '/admin/b2b-enquiries', icon: Briefcase },
     { name: 'Announcements', path: '/admin/announcements', icon: Megaphone },
+    { name: 'Branches', path: '/admin/branches', icon: Building2 },
     { name: 'Settings', path: '/admin/settings', icon: Settings },
   ];
 

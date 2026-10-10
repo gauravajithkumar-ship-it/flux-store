@@ -79,7 +79,7 @@ const ContactUs = () => {
                 </div>
                 <div className="min-w-0">
                   <h4 className="text-white font-medium mb-1">Store Address</h4>
-                  <p className="text-gray-400 break-words">123 Electronics Hub, Tech Park<br/>Mumbai, Maharashtra 400001</p>
+                  <p className="text-gray-400 break-words">123 lilleria peramount,<br/>Vadodara, Gujarat 390001</p>
                 </div>
               </div>
 

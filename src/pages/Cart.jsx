@@ -1,18 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { Trash2, Plus, Minus, ArrowRight, Tag, ShoppingBag, ArrowLeft, TicketPercent, Check, Loader2, Gift, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { Trash2, Plus, Minus, ArrowRight, ShoppingBag, ArrowLeft } from 'lucide-react';
 
 const Cart = () => {
   const {
     cartItems,
     removeFromCart,
     updateQuantity,
-    couponCode,
-    setCouponCode,
     appliedCoupon,
-    applyCoupon,
-    removeCoupon,
     subtotal,
     SHIPPING_COST,
     FREE_SHIPPING_THRESHOLD,
@@ -20,15 +15,8 @@ const Cart = () => {
     couponDiscount,
     total,
     isLoading,
-    // New coupon values
-    availableCoupons,
-    isCouponLoading,
-    couponMessage,
-    setCouponMessage,
     getItemPrice,
   } = useCart();
-
-  const [couponError, setCouponError] = useState('');
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-IN', {
@@ -36,29 +24,6 @@ const Cart = () => {
       currency: 'INR',
       maximumFractionDigits: 0,
     }).format(price);
-  };
-
-  const handleApplyCoupon = async (e) => {
-    e.preventDefault();
-    if (!couponCode.trim()) return;
-    setCouponError('');
-    const result = await applyCoupon(couponCode);
-    if (!result.success) {
-      setCouponError(result.message);
-    } else {
-      setCouponError('');
-    }
-  };
-
-  const handleApplyCouponFromCard = async (code) => {
-    setCouponCode(code);
-    setCouponError('');
-    const result = await applyCoupon(code);
-    if (!result.success) {
-      setCouponError(result.message);
-    } else {
-      setCouponError('');
-    }
   };
 
   // Calculate estimated delivery (Today + 3 days)
@@ -70,14 +35,6 @@ const Cart = () => {
   // Calculate Total Savings
   const mrpTotal = cartItems.reduce((sum, item) => sum + (item.price || getItemPrice(item)) * item.quantity, 0);
   const savings = mrpTotal - subtotal + couponDiscount;
-
-  // Helper: calculate savings for a coupon
-  const getCouponSavings = (coupon) => {
-    if (coupon.discount_type === 'percentage') {
-      return Math.round(subtotal * (Number(coupon.discount_value) / 100));
-    }
-    return Number(coupon.discount_value);
-  };
 
   if (isLoading) {
     return (
@@ -192,124 +149,6 @@ const Cart = () => {
               })}
             </div>
 
-            {/* Savings & Rewards Section */}
-            {availableCoupons.length > 0 && (
-              <div className="glass-panel rounded-3xl p-4 sm:p-6 border border-white/5 bg-black/40 backdrop-blur-xl">
-                <div className="flex items-center justify-between mb-5">
-                  <div>
-                    <h3 className="text-base sm:text-lg font-semibold text-white flex items-center gap-2">
-                      <Gift size={20} className="text-cyan-400" />
-                      Savings & Rewards
-                    </h3>
-                    <p className="text-xs sm:text-sm text-gray-400 mt-1">Best Offers for you</p>
-                  </div>
-                  <div className="text-xs text-cyan-400 bg-cyan-400/10 px-3 py-1 rounded-full font-medium">
-                    {availableCoupons.length} offers
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  {availableCoupons.map((coupon) => {
-                    const isEligible = subtotal >= Number(coupon.min_order_amount);
-                    const savingsAmount = getCouponSavings(coupon);
-                    const minAmount = Number(coupon.min_order_amount);
-                    const progress = minAmount > 0 ? Math.min(subtotal / minAmount, 1) : 1;
-                    const isApplied = appliedCoupon?.code === coupon.code;
-
-                    return (
-                      <div
-                        key={coupon.id}
-                        className={`border rounded-2xl p-4 relative overflow-hidden transition-all duration-300 ${
-                          isApplied
-                            ? 'border-emerald-500/40 bg-emerald-500/5'
-                            : isEligible
-                              ? 'border-white/10 hover:border-cyan-500/30 bg-white/[0.02]'
-                              : 'border-white/5 bg-white/[0.01] opacity-80'
-                        }`}
-                      >
-                        {/* Applied glow effect */}
-                        {isApplied && (
-                          <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent pointer-events-none" />
-                        )}
-
-                        {/* Top row: Code pill + Save amount */}
-                        <div className="flex items-center justify-between mb-2 relative gap-2">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                              isEligible ? 'bg-emerald-500/10' : 'bg-white/5'
-                            }`}>
-                              <TicketPercent size={18} className={isEligible ? 'text-emerald-400' : 'text-gray-500'} />
-                            </div>
-                            <span className="bg-white/10 text-white font-mono font-bold text-xs sm:text-sm px-2 sm:px-3 py-1.5 rounded-lg border border-white/5 tracking-wider truncate">
-                              {coupon.code}
-                            </span>
-                          </div>
-                          <span className="text-emerald-400 font-bold text-xs sm:text-sm shrink-0">
-                            Save {formatPrice(savingsAmount)}
-                          </span>
-                        </div>
-
-                        {/* Eligibility message */}
-                        <div className="flex items-center justify-between ml-0 sm:ml-[46px]">
-                          <div>
-                        {isEligible ? (
-                          <p className="text-emerald-400/90 text-xs flex items-center gap-1.5 mb-1">
-                            <Sparkles size={12} />
-                            Yay! You unlocked this offer 🎉
-                          </p>
-                        ) : (
-                          <p className="text-amber-400/80 text-xs mb-1">
-                            Add {formatPrice(minAmount - subtotal)} more to unlock
-                          </p>
-                        )}
-
-                        {/* Progress bar */}
-                        <div className="h-1.5 bg-white/5 rounded-full overflow-hidden w-full max-w-[200px]">
-                          <div
-                            className={`h-full rounded-full transition-all duration-700 ease-out ${
-                              isEligible ? 'bg-emerald-500' : 'bg-amber-500'
-                            }`}
-                            style={{ width: `${progress * 100}%` }}
-                          />
-                        </div>
-                          </div>
-
-                          <button
-                            onClick={() => handleApplyCouponFromCard(coupon.code)}
-                            disabled={!isEligible || isApplied || isCouponLoading}
-                            className={`px-4 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-200 shrink-0 ${
-                              isApplied
-                                ? 'border-emerald-500/40 text-emerald-400 bg-emerald-500/10 cursor-default'
-                                : isEligible
-                                  ? 'border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 hover:shadow-[0_0_12px_rgba(16,185,129,0.2)] active:scale-95'
-                                  : 'border-white/10 text-gray-500 cursor-not-allowed'
-                            }`}
-                          >
-                            {isApplied ? (
-                              <span className="flex items-center gap-1">
-                                <Check size={12} /> Applied
-                              </span>
-                            ) : 'Apply'}
-                          </button>
-                        </div>
-
-                        {/* Bottom row: details + Apply button */}
-                        <div className="flex items-center justify-between mt-3 ml-0">
-                          <div className="text-[10px] sm:text-xs text-gray-500">
-                            {coupon.discount_type === 'percentage'
-                              ? `${coupon.discount_value}% off`
-                              : `Flat ₹${Number(coupon.discount_value).toLocaleString('en-IN')} off`
-                            }
-                            {minAmount > 0 && ` • Min. ${formatPrice(minAmount)}`}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
             <div className="flex justify-between items-center px-2">
               <Link
                 to="/products"
@@ -325,50 +164,6 @@ const Cart = () => {
           <div className="w-full lg:w-1/3">
             <div className="glass-panel rounded-3xl p-5 sm:p-6 md:p-8 border border-white/5 bg-black/40 backdrop-blur-xl lg:sticky lg:top-32">
               <h2 className="text-lg sm:text-xl font-bold text-white mb-6">Order Summary</h2>
-
-              {/* Coupon Section */}
-              <div className="mb-8">
-                <form onSubmit={handleApplyCoupon} className="flex gap-2 relative">
-                  <div className="relative flex-1 min-w-0">
-                    <Tag size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Coupon code"
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-3 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 transition-colors uppercase text-sm"
-                      disabled={appliedCoupon || isCouponLoading}
-                    />
-                  </div>
-                  {!appliedCoupon ? (
-                    <button
-                      type="submit"
-                      disabled={isCouponLoading}
-                      className="bg-white/10 hover:bg-white/20 text-white px-4 sm:px-6 rounded-xl font-medium transition-colors flex items-center justify-center min-w-[70px] sm:min-w-[80px] disabled:opacity-60 text-sm"
-                    >
-                      {isCouponLoading ? (
-                        <Loader2 size={18} className="animate-spin" />
-                      ) : (
-                        'Apply'
-                      )}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={removeCoupon}
-                      className="bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 px-4 sm:px-6 rounded-xl font-medium transition-colors text-sm"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </form>
-                {couponError && <p className="text-rose-500 text-sm mt-2 ml-1">{couponError}</p>}
-                {appliedCoupon && (
-                  <p className="text-emerald-400 text-sm mt-2 ml-1 flex items-center gap-1">
-                    <Tag size={14} /> '{appliedCoupon.code}' applied successfully!
-                  </p>
-                )}
-              </div>
 
               {/* Cost Breakdown */}
               <div className="space-y-4 text-sm mb-6 border-b border-white/10 pb-6">
