@@ -343,7 +343,7 @@ const Invoice = ({ order, ref, className = '' }) => {
       </div>
 
       {/* PAYMENT + TOTALS */}
-      <div className="px-[60px] mt-[15px] flex" style={{ gap: '15px' }}>
+      <div data-invoice-page-break className="px-[60px] mt-[15px] flex" style={{ gap: '15px' }}>
         <div className="flex-1" style={{ background: '#f1f8ff', border: '1px solid #dcecf8', borderRadius: '7px', padding: '15px' }}>
           <div className="font-extrabold" style={{ fontSize: '10px', letterSpacing: '2px', color: '#12395e', marginBottom: '12px' }}>
             ▣ &nbsp;PAYMENT INFORMATION
