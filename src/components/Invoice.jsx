@@ -312,10 +312,10 @@ const Invoice = ({ order, ref, className = '' }) => {
                       </span>
                     ) : null}
                     <div style={{ minWidth: 0 }}>
-                      <div className="font-extrabold truncate" style={{ fontSize: '9.5px', color: '#102a43', marginBottom: '4px' }}>
+                      <div className="font-extrabold" style={{ fontSize: '9.5px', color: '#102a43', marginBottom: '4px', whiteSpace: 'normal', overflowWrap: 'anywhere' }}>
                         {item.name}
                       </div>
-                      <div className="truncate" style={{ fontSize: '8px', color: '#7290aa' }}>
+                      <div style={{ fontSize: '8px', color: '#7290aa', whiteSpace: 'normal', overflowWrap: 'anywhere' }}>
                         {describe(item)}
                       </div>
                     </div>
